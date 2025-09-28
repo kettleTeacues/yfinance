@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from dotenv import load_dotenv
 load_dotenv()
 
-from models import Base
+from models.models import Base
 
 class DatabaseClient:
     """SQLAlchemyデータベースクライアント"""

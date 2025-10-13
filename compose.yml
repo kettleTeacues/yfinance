@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: yf
+    image: yf
+    environment:
+      - PG_URL=postgresql://<user_name>:<password>@<host_name>/<db_name>

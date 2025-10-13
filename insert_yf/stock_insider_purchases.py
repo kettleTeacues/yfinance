@@ -9,7 +9,7 @@ from models.models import InsiderPurchases
 from database.client import db_client
 
 
-def insert_stock_insider_purchases(symbol: str) -> int:
+def insert_stock_insider_purchases(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄のインサイダー取引データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,11 +20,11 @@ def insert_stock_insider_purchases(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # インサイダー取引データを取得
-        insider_purchases_data = ticker.insider_purchases
+        insider_purchases_data = yf_client.insider_purchases
         
         if insider_purchases_data is None or insider_purchases_data.empty:
             print(f"No insider purchases data found for {symbol}")

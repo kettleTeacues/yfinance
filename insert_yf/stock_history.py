@@ -10,7 +10,7 @@ from models.models import History
 from database.client import db_client
 
 
-def insert_stock_history(symbol: str, period: str = "1y") -> int:
+def insert_stock_history(yf_client: yf.Ticker, period: str = "1y") -> int:
     """
     指定された銘柄の株価履歴データを取得し、データベースに挿入する
     upsert機能を使用して既存レコードの更新または新規挿入を行う
@@ -22,11 +22,11 @@ def insert_stock_history(symbol: str, period: str = "1y") -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
-    
+    symbol = yf_client.ticker or ''
+
     try:
         # 株価履歴データを取得
-        hist_data = ticker.history(period=period)
+        hist_data = yf_client.history(period=period)
         
         if hist_data.empty:
             print(f"No stock history found for {symbol}")

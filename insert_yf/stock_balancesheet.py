@@ -10,7 +10,7 @@ from models.models import Balancesheet
 from database.client import db_client
 
 
-def insert_stock_balancesheet(symbol: str, period: str = "annual") -> int:
+def insert_stock_balancesheet(yf_client: yf.Ticker, period: str = "annual") -> int:
     """
     指定された銘柄の貸借対照表データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -22,15 +22,15 @@ def insert_stock_balancesheet(symbol: str, period: str = "annual") -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
-    
+    symbol = yf_client.ticker or ''
+
     try:
         # 貸借対照表データを取得（年次と四半期）
         processed_count = 0
         
         # 年次データの処理
         if period in ["annual", "both"]:
-            annual_data = ticker.balance_sheet
+            annual_data = yf_client.balance_sheet
             if not annual_data.empty:
                 with db_client.session_scope() as session:
                     count = _bulk_process_balancesheet_data(session, symbol, annual_data, "annual")
@@ -39,7 +39,7 @@ def insert_stock_balancesheet(symbol: str, period: str = "annual") -> int:
         
         # 四半期データの処理
         if period in ["quarterly", "both"]:
-            quarterly_data = ticker.quarterly_balance_sheet
+            quarterly_data = yf_client.quarterly_balance_sheet
             if not quarterly_data.empty:
                 with db_client.session_scope() as session:
                     count = _bulk_process_balancesheet_data(session, symbol, quarterly_data, "quarterly")

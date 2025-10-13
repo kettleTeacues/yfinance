@@ -9,7 +9,7 @@ from models.models import MajorHolders
 from database.client import db_client
 
 
-def insert_stock_major_holders(symbol: str) -> int:
+def insert_stock_major_holders(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の主要株主情報データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,11 +20,11 @@ def insert_stock_major_holders(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 主要株主情報データを取得
-        major_holders_data = ticker.major_holders
+        major_holders_data = yf_client.major_holders
         
         if major_holders_data is None or major_holders_data.empty:
             print(f"No major holders data found for {symbol}")

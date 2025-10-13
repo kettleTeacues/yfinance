@@ -11,7 +11,7 @@ from database.client import db_client
 from .utils import safe_get, safe_timestamp_to_str
 
 
-def insert_stock_earnings_estimate(symbol: str) -> int:
+def insert_stock_earnings_estimate(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の収益予想データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -22,11 +22,11 @@ def insert_stock_earnings_estimate(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 収益予想データを取得
-        earnings_estimate_data = ticker.earnings_estimate
+        earnings_estimate_data = yf_client.earnings_estimate
         
         if earnings_estimate_data is None or earnings_estimate_data.empty:
             print(f"No earnings estimate data found for {symbol}")

@@ -8,7 +8,7 @@ from models.models import News
 from database.client import db_client
 
 
-def insert_stock_news(symbol: str) -> int:
+def insert_stock_news(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の株式ニュース情報データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -19,11 +19,11 @@ def insert_stock_news(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 株式ニュース情報データを取得
-        news_data = ticker.news
+        news_data = yf_client.news
         
         if not news_data or len(news_data) == 0:
             print(f"No news data found for {symbol}")

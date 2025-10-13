@@ -9,7 +9,7 @@ from models.models import EpsTrend
 from database.client import db_client
 
 
-def insert_stock_eps_trend(symbol: str) -> int:
+def insert_stock_eps_trend(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄のEPS予想トレンドデータを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,11 +20,11 @@ def insert_stock_eps_trend(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # EPS予想トレンドデータを取得
-        eps_trend_data = ticker.eps_trend
+        eps_trend_data = yf_client.eps_trend
         
         if eps_trend_data is None or eps_trend_data.empty:
             print(f"No EPS trend data found for {symbol}")

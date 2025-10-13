@@ -14,7 +14,7 @@ from database.client import db_client
 from .utils import safe_get
 
 
-def insert_stock_calendar(symbol: str) -> int:
+def insert_stock_calendar(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄のカレンダーデータを取得し、データベースに挿入する
     
@@ -24,11 +24,11 @@ def insert_stock_calendar(symbol: str) -> int:
     Returns:
         int: 挿入された行数
     """
-    ticker = yf.Ticker(symbol)
-    
+    symbol = yf_client.ticker or ''
+
     try:
         # カレンダーデータを取得
-        calendar_data = ticker.calendar
+        calendar_data = yf_client.calendar
         
         if not calendar_data or (isinstance(calendar_data, dict) and len(calendar_data) == 0):
             print(f"No calendar data found for {symbol}")

@@ -9,7 +9,7 @@ from models.models import EpsRevisions
 from database.client import db_client
 
 
-def insert_stock_eps_revisions(symbol: str) -> int:
+def insert_stock_eps_revisions(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄のEPS予想修正データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,11 +20,11 @@ def insert_stock_eps_revisions(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # EPS予想修正データを取得
-        eps_revisions_data = ticker.eps_revisions
+        eps_revisions_data = yf_client.eps_revisions
         
         if eps_revisions_data is None or eps_revisions_data.empty:
             print(f"No EPS revisions data found for {symbol}")

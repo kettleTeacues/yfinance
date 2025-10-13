@@ -9,7 +9,7 @@ from models.models import EarningsDates
 from database.client import db_client
 
 
-def insert_stock_earnings_dates(symbol: str) -> int:
+def insert_stock_earnings_dates(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の決算発表日データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,11 +20,12 @@ def insert_stock_earnings_dates(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
+
     
     try:
         # 決算発表日データを取得
-        earnings_dates_data = ticker.earnings_dates
+        earnings_dates_data = yf_client.earnings_dates
         
         if earnings_dates_data.empty:
             print(f"No earnings dates data found for {symbol}")

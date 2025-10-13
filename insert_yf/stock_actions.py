@@ -10,7 +10,7 @@ from models.models import Actions
 from database.client import db_client
 
 
-def insert_stock_actions(symbol: str, period: str = "max") -> int:
+def insert_stock_actions(yf_client: yf.Ticker, period: str = "max") -> int:
     """
     指定された銘柄のアクション履歴データ（配当と株式分割）を取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -22,11 +22,11 @@ def insert_stock_actions(symbol: str, period: str = "max") -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # アクション履歴データを取得
-        actions_data = ticker.actions
+        actions_data = yf_client.actions
         
         if actions_data.empty:
             print(f"No actions data found for {symbol}")

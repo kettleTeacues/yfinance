@@ -10,7 +10,7 @@ from models.models import RevenueEstimate
 from database.client import db_client
 
 
-def insert_stock_revenue_estimate(symbol: str) -> int:
+def insert_stock_revenue_estimate(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の売上予想データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -21,11 +21,11 @@ def insert_stock_revenue_estimate(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 売上予想データを取得
-        revenue_estimate_data = ticker.revenue_estimate
+        revenue_estimate_data = yf_client.revenue_estimate
         
         if revenue_estimate_data is None or revenue_estimate_data.empty:
             print(f"No revenue estimate data found for {symbol}")

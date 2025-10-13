@@ -9,7 +9,7 @@ from models.models import InstitutionalHolders
 from database.client import db_client
 
 
-def insert_stock_institutional_holders(symbol: str) -> int:
+def insert_stock_institutional_holders(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の機関投資家保有データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,11 +20,11 @@ def insert_stock_institutional_holders(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 機関投資家保有データを取得
-        institutional_holders_data = ticker.institutional_holders
+        institutional_holders_data = yf_client.institutional_holders
         
         if institutional_holders_data is None or institutional_holders_data.empty:
             print(f"No institutional holders data found for {symbol}")

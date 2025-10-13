@@ -9,7 +9,7 @@ from models.models import GrowthEstimate
 from database.client import db_client
 
 
-def insert_stock_growth_estimates(symbol: str) -> int:
+def insert_stock_growth_estimates(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の成長予想データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,11 +20,11 @@ def insert_stock_growth_estimates(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 成長予想データを取得
-        growth_estimates_data = ticker.growth_estimates
+        growth_estimates_data = yf_client.growth_estimates
         
         if growth_estimates_data is None or growth_estimates_data.empty:
             print(f"No growth estimates data found for {symbol}")

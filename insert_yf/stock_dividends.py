@@ -9,7 +9,7 @@ from models.models import Dividends
 from database.client import db_client
 
 
-def insert_stock_dividends(symbol: str, period: str = "max") -> int:
+def insert_stock_dividends(yf_client: yf.Ticker, period: str = "max") -> int:
     """
     指定された銘柄の配当履歴データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -21,11 +21,11 @@ def insert_stock_dividends(symbol: str, period: str = "max") -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 配当履歴データを取得
-        dividends_data = ticker.dividends
+        dividends_data = yf_client.dividends
         
         if dividends_data.empty:
             print(f"No dividends data found for {symbol}")

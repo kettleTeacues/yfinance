@@ -9,7 +9,7 @@ from models.models import IncomeStatement
 from database.client import db_client
 
 
-def insert_stock_income_stmt(symbol: str) -> int:
+def insert_stock_income_stmt(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の損益計算書データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,11 +20,11 @@ def insert_stock_income_stmt(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 損益計算書データを取得
-        income_stmt_data = ticker.income_stmt
+        income_stmt_data = yf_client.income_stmt
         
         if income_stmt_data is None or income_stmt_data.empty:
             print(f"No income statement data found for {symbol}")

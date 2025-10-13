@@ -8,7 +8,7 @@ from models.models import CashFlow
 from database.client import db_client
 
 
-def insert_stock_cashflow(symbol: str, period: str = "max") -> int:
+def insert_stock_cashflow(yf_client: yf.Ticker, period: str = "max") -> int:
     """
     指定された銘柄のキャッシュフローデータを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,12 +20,12 @@ def insert_stock_cashflow(symbol: str, period: str = "max") -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 年次および四半期のキャッシュフローデータを取得
-        annual_cf = ticker.cashflow
-        quarterly_cf = ticker.quarterly_cashflow
+        annual_cf = yf_client.cashflow
+        quarterly_cf = yf_client.quarterly_cashflow
         
         if annual_cf.empty and quarterly_cf.empty:
             print(f"No cashflow data found for {symbol}")

@@ -9,7 +9,7 @@ from models.models import EarningsHistory
 from database.client import db_client
 
 
-def insert_stock_earnings_history(symbol: str) -> int:
+def insert_stock_earnings_history(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の収益実績データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,11 +20,11 @@ def insert_stock_earnings_history(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 収益実績データを取得
-        earnings_history_data = ticker.earnings_history
+        earnings_history_data = yf_client.earnings_history
         
         if earnings_history_data is None or earnings_history_data.empty:
             print(f"No earnings history data found for {symbol}")

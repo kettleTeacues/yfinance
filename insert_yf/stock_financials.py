@@ -9,7 +9,7 @@ from models.models import Financials
 from database.client import db_client
 
 
-def insert_stock_financials(symbol: str) -> int:
+def insert_stock_financials(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の財務諸表データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -20,11 +20,11 @@ def insert_stock_financials(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 財務諸表データを取得
-        financials_data = ticker.financials
+        financials_data = yf_client.financials
         
         if financials_data is None or financials_data.empty:
             print(f"No financials data found for {symbol}")

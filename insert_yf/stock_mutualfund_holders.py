@@ -10,7 +10,7 @@ from models.models import MutualfundHolders
 from database.client import db_client
 
 
-def insert_stock_mutualfund_holders(symbol: str) -> int:
+def insert_stock_mutualfund_holders(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の投資信託保有情報データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -21,11 +21,11 @@ def insert_stock_mutualfund_holders(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 投資信託保有情報データを取得
-        mutualfund_holders_data = ticker.mutualfund_holders
+        mutualfund_holders_data = yf_client.mutualfund_holders
         
         if mutualfund_holders_data is None or mutualfund_holders_data.empty:
             print(f"No mutual fund holders data found for {symbol}")

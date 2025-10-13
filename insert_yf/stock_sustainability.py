@@ -10,7 +10,7 @@ from models.models import Sustainability
 from database.client import db_client
 
 
-def insert_stock_sustainability(symbol: str) -> int:
+def insert_stock_sustainability(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄のESG持続可能性データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -21,11 +21,11 @@ def insert_stock_sustainability(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 持続可能性データを取得
-        sustainability_data = ticker.sustainability
+        sustainability_data = yf_client.sustainability
         
         # データが存在しない場合の判定を修正
         if sustainability_data is None:

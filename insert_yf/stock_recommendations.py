@@ -11,7 +11,7 @@ from database.client import db_client
 from .utils import safe_get, safe_timestamp_to_str
 
 
-def insert_stock_recommendations(symbol: str) -> int:
+def insert_stock_recommendations(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄のアナリスト推奨情報データを取得し、データベースに挿入する
     upsert機能とbulk機能を常に使用する
@@ -22,11 +22,11 @@ def insert_stock_recommendations(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # アナリスト推奨情報データを取得
-        recommendations_data = ticker.recommendations
+        recommendations_data = yf_client.recommendations
         
         if recommendations_data is None or recommendations_data.empty:
             print(f"No recommendations data found for {symbol}")

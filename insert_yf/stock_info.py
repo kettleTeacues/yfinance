@@ -10,7 +10,7 @@ from database.client import db_client
 from .utils import safe_get, safe_timestamp_to_str
 
 
-def insert_stock_info(symbol: str) -> int:
+def insert_stock_info(yf_client: yf.Ticker) -> int:
     """
     指定された銘柄の基本情報データを取得し、データベースに挿入する
     upsert機能を使用して既存レコードの更新または新規挿入を行う
@@ -21,11 +21,11 @@ def insert_stock_info(symbol: str) -> int:
     Returns:
         int: 処理された行数
     """
-    ticker = yf.Ticker(symbol)
+    symbol = yf_client.ticker or ''
     
     try:
         # 株式基本情報を取得
-        info_data = ticker.info
+        info_data = yf_client.info
         
         if not info_data or len(info_data) == 0:
             print(f"No stock info found for {symbol}")

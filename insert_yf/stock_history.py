@@ -4,20 +4,21 @@ Stock History data insertion module for yfinance
 import yfinance as yf
 from datetime import datetime
 import pandas as pd
-from typing import Optional
+from typing import Optional, Literal
 
-from models.models import History
+from models.models import History, History_1min
 from database.client import db_client
 
 
-def insert_stock_history(yf_client: yf.Ticker, period: str = "1y") -> int:
+def insert_stock_history(yf_client: yf.Ticker, period: str = "1d", interval: Literal["1m", "1d"] ="1d") -> int:
     """
     指定された銘柄の株価履歴データを取得し、データベースに挿入する
     upsert機能を使用して既存レコードの更新または新規挿入を行う
     
     Args:
         symbol: 銘柄シンボル (例: "AAPL", "7974.T")
-        period: 取得期間 ("1y", "2y", "5y", "10y", "ytd", "max"など)
+        period: 取得期間 ("1d", "1mo", "1y" "ytd", "max" など)
+        interval: 足 ("1m", "1h", "1d", "1wk", "1mo" など)
     
     Returns:
         int: 処理された行数
@@ -26,7 +27,7 @@ def insert_stock_history(yf_client: yf.Ticker, period: str = "1y") -> int:
 
     try:
         # 株価履歴データを取得
-        hist_data = yf_client.history(period=period)
+        hist_data = yf_client.history(period=period, interval=interval)
         
         if hist_data.empty:
             print(f"No stock history found for {symbol}")
@@ -35,7 +36,7 @@ def insert_stock_history(yf_client: yf.Ticker, period: str = "1y") -> int:
         processed_count = 0
         
         with db_client.session_scope() as session:
-            processed_count = _process_stock_history_data(session, symbol, hist_data)
+            processed_count = _process_stock_history_data(session, symbol, hist_data, interval)
             session.commit()
             print(f"Successfully processed {processed_count} stock history records for {symbol}")
             return processed_count
@@ -45,7 +46,7 @@ def insert_stock_history(yf_client: yf.Ticker, period: str = "1y") -> int:
         return 0
 
 
-def _process_stock_history_data(session, symbol: str, hist_data: pd.DataFrame) -> int:
+def _process_stock_history_data(session, symbol: str, hist_data: pd.DataFrame, interval: Literal["1m", "1d"]) -> int:
     """
     株価履歴データを処理してDBに挿入する（bulk upsert）
     
@@ -59,11 +60,13 @@ def _process_stock_history_data(session, symbol: str, hist_data: pd.DataFrame) -
     """
     current_time = datetime.now().isoformat()[:24]
     processed_count = 0
+
+    history_model = History_1min if interval == "1m" else History
     
     # 既存の日付を取得してセットに変換（高速検索用）
     existing_dates = set(
-        row[0] for row in session.query(History.date).filter(
-            History.symbol == symbol
+        row[0] for row in session.query(history_model.date).filter(
+            history_model.symbol == symbol
         ).all()
     )
     
@@ -104,15 +107,15 @@ def _process_stock_history_data(session, symbol: str, hist_data: pd.DataFrame) -
     
     # bulk insert実行
     if new_records:
-        session.bulk_insert_mappings(History, new_records)
+        session.bulk_insert_mappings(history_model, new_records)
         print(f"Bulk inserted {len(new_records)} new history records")
     
     # bulk update実行
     if update_records:
         for record in update_records:
-            session.query(History).filter(
-                History.symbol == record['symbol'],
-                History.date == record['date']
+            session.query(history_model).filter(
+                history_model.symbol == record['symbol'],
+                history_model.date == record['date']
             ).update({
                 'open': record['open'],
                 'high': record['high'],

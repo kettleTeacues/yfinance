@@ -1218,6 +1218,47 @@ class History(Base):
             'updated_at': self.updated_at.isoformat() if self.updated_at is not None else None,
         }
 
+class History_1min(Base):
+    """
+    株価履歴データを格納するテーブル
+    1分足の価格、出来高、配当、株式分割情報を管理
+    """
+    __tablename__ = 'history_1min'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    symbol = Column(String(20), ForeignKey('stock_info.symbol'), nullable=False, index=True)
+    date = Column(String(24), nullable=False, index=True, comment='取引日')
+    
+    # 価格情報（OHLC）
+    open = Column(Float, comment='始値')
+    high = Column(Float, comment='高値')
+    low = Column(Float, comment='安値')
+    close = Column(Float, comment='終値')
+    volume = Column(Float, comment='出来高')
+    
+    created_at = Column(String(24))
+    updated_at = Column(String(24))
+    
+    # リレーションシップ
+    stock = relationship("StockInfo", backref="history_1min")
+    
+    def __repr__(self):
+        return f"<History_1min(date='{self.date}')>"
+    
+    def to_dict(self):
+        """モデルを辞書形式に変換"""
+        return {
+            'id': self.id,
+            'date': self.date.isoformat() if self.date is not None else None,
+            'open': self.open,
+            'high': self.high,
+            'low': self.low,
+            'close': self.close,
+            'volume': self.volume,
+            'created_at': self.created_at.isoformat() if self.created_at is not None else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at is not None else None,
+        }
+
 class IncomeStatement(Base):
     """
     損益計算書データを格納するテーブル

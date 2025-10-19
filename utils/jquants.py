@@ -1,7 +1,8 @@
-import os
-import requests
 from dotenv import load_dotenv
 load_dotenv()
+
+import os
+import requests
 
 class JQuantsClient:
     def __init__(self, base_url=None, mail_address=None, password=None):
@@ -42,10 +43,3 @@ class JQuantsClient:
         data: list[dict[str, str]] = res.json().get('info')
 
         return data
-
-if __name__ == '__main__':
-    jq_client = JQuantsClient()
-    companies = jq_client.getCompanies()
-    symbols = [company.get('Code', '')[:4] for company in companies]
-
-    pass

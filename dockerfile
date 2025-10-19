@@ -13,6 +13,7 @@ RUN apt-get update && \
 RUN groupadd -r $USERNAME && useradd -r -g $USERNAME $USERNAME
 WORKDIR /home/$USERNAME
 
+COPY ./commands ./commands
 COPY ./database ./database
 COPY ./insert_yf ./insert_yf
 COPY ./models ./models
